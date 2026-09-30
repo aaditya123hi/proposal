@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Love Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1424;--bg2:#1f3556;--ink:#fff3ee;--soft:#f3c9d4;--rose:#ff5c8a;--gold:#f6c982;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1424}}
+:root[data-theme="dark"]{--bg:#0b1424}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html.lock,html.lock body{overflow:hidden}
+body{margin:0;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg) 70%) fixed,#0b1424;color:var(--ink);
+font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:1.25rem;line-height:1.6;overflow-x:hidden}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+main{position:relative;z-index:1}
+section{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:12vh 1.5rem 3rem}
+.script{font-family:"Pinyon Script","Snell Roundhand",cursive;font-weight:400;color:var(--rose);font-size:clamp(3rem,12vw,7rem);line-height:1.05;margin:0;text-shadow:0 0 40px rgba(255,92,138,.55)}
+.script span{display:inline-block;opacity:0;transform:translateY(30px) rotateX(-70deg);animation:in .9s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes in{to{opacity:1;transform:none}}
+.sub{max-width:34ch;margin:1rem auto 0;color:var(--soft);font-style:italic;font-size:clamp(1.15rem,3.6vw,1.5rem)}
+.line{max-width:26ch;font-size:clamp(1.6rem,5.5vw,2.5rem);line-height:1.3;margin:0;opacity:0;transform:translateY(24px);transition:opacity 1s,transform 1s}
+.line.on{opacity:1;transform:none}
+.hint{margin-top:auto;color:var(--soft);font-size:1rem;animation:bob 2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(8px)}}
+.btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:auto}
+button{font:inherit;font-size:1.25rem;padding:.75rem 2rem;border-radius:999px;border:1px solid var(--rose);cursor:pointer;color:var(--ink);background:transparent;transition:transform .25s}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.primary,#yes{background:linear-gradient(135deg,#ff5c8a,#ff8aa8);border-color:transparent;font-weight:600;box-shadow:0 0 30px rgba(255,92,138,.5)}
+#yes{animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.06)}}
+#intro{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9rem;text-align:center;padding:1.5rem;
+background:radial-gradient(100% 80% at 50% 20%,rgba(31,53,86,.88),rgba(11,20,36,.94));transition:opacity 1.2s,visibility 1.2s}
+#intro.gone{opacity:0;visibility:hidden;pointer-events:none}
+input{font:inherit;font-size:1.4rem;text-align:center;width:min(340px,86vw);padding:.5rem;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--rose)}
+input::placeholder{color:#c48a9d}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem}
+.ghost{font-size:1.05rem;padding:.6rem 1.4rem}
+#lnk{font-size:.95rem;color:var(--gold)}
+.pick label{display:flex;align-items:center;gap:.5rem;color:var(--soft);font-size:1.1rem}
+.pick input{width:42px;height:42px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
+#ask{font-size:clamp(2.4rem,8.5vw,4.6rem)}
+#win{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;padding-top:12vh;text-align:center;pointer-events:none}
+#win.show{display:flex}
+#win .script{animation:pop 1.2s cubic-bezier(.2,1.4,.3,1)}
+@keyframes pop{from{transform:scale(.2);opacity:0}}
+.c{position:fixed;top:-2rem;z-index:6;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(var(--r))}}
+@media (prefers-reduced-motion:reduce){.script span,.line{animation:none;opacity:1;transform:none;transition:none}#yes,.hint{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<div id="intro">
+  <h1 class="script">Our love story</h1>
+  <p class="sub">Type two names and press begin.</p>
+  <input id="fromIn" placeholder="Your name" maxlength="24" autocomplete="off">
+  <input id="toIn" placeholder="Their name" maxlength="24" autocomplete="off">
+  <div class="row pick"><label>Her dress <input type="color" id="dressC" value="#ff6f9c" aria-label="Dress color"></label><label>His suit <input type="color" id="suitC" value="#2c3e6b" aria-label="Suit color"></label></div>
+  <div class="row"><button id="go" class="primary">Begin the story</button><button id="copy" class="ghost">Get link to send</button></div>
+  <input id="lnk" readonly hidden aria-label="Shareable link">
+</div>
+
+<main>
+  <section><h1 class="script" id="title"></h1><p class="sub">A love story, told in four small chapters.</p><div class="hint">scroll slowly</div></section>
+  <section><p class="line" id="c1"></p></section>
+  <section><p class="line" id="c2"></p></section>
+  <section><p class="line" id="c3"></p></section>
+  <section><h2 class="script" id="ask"></h2><p class="sub" id="sign"></p>
+    <div class="btns"><button id="yes">Yes, forever</button><button id="no">Let me think</button></div></section>
+</main>
+
+<div id="win" role="status"><h2 class="script">She said yes!</h2><p class="sub">Forever starts now. I love you.</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const ss=(a,b,x)=>{x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const q=new URLSearchParams(location.search);
+let started=false,celebrate=0,names={from:'',to:''};
+document.documentElement.classList.add('lock');
+$('fromIn').value=q.get('from')||'';$('toIn').value=q.get('to')||'';
+
+function start(){
+ const f=$('fromIn').value.trim()||'Someone',t=$('toIn').value.trim()||'my love';
+ names={from:f,to:t};document.title=f+' & '+t;
+ const T=$('title');T.textContent='';
+ (f+' & '+t).split(' ').forEach((w,i)=>{const s=document.createElement('span');s.textContent=w+'\u00a0';s.style.animationDelay=(.4+i*.25)+'s';T.appendChild(s)});
+ $('c1').textContent='Once upon a time, '+f+' and '+t+' lived in different corners of the world.';
+ $('c2').textContent='Then one day their paths crossed, and nothing was ever the same.';
+ $('c3').textContent='Every walk, every laugh, every quiet moment felt a little more like home.';
+ $('ask').textContent=t+', will you marry me?';
+ $('sign').textContent='With all my heart, '+f;
+ $('intro').classList.add('gone');document.documentElement.classList.remove('lock');
+ scrollTo(0,0);started=true;
+}
+$('go').onclick=start;
+$('copy').onclick=()=>{
+ const u=location.origin+location.pathname+'?from='+encodeURIComponent($('fromIn').value.trim())+'&to='+encodeURIComponent($('toIn').value.trim())+'&dress='+encodeURIComponent($('dressC').value)+'&suit='+encodeURIComponent($('suitC').value);
+ const l=$('lnk');l.hidden=false;l.value=u;l.select();
+ try{navigator.clipboard.writeText(u)}catch(e){}
+};
+if(q.get('from')&&q.get('to'))start();
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')}),{threshold:.5});
+document.querySelectorAll('.line,#ask').forEach(l=>{l.classList.add('line');io.observe(l)});
+$('ask').style.maxWidth='14ch';
+
+// ---------- 3D ----------
+const R=new THREE.WebGLRenderer({canvas:$('gl'),alpha:true,antialias:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(50,1,.1,100);
+S.add(new THREE.HemisphereLight(0xbcd0ff,0x39465e,.7));
+const l1=new THREE.DirectionalLight(0xfff1e6,.85);l1.position.set(2,5,7);l1.target.position.set(0,-1.5,0);l1.castShadow=true;l1.shadow.mapSize.set(1024,1024);l1.shadow.normalBias=.03;
+Object.assign(l1.shadow.camera,{left:-7,right:7,top:6,bottom:-6,near:1,far:25});S.add(l1,l1.target);
+const l2=new THREE.DirectionalLight(0x7fa6ff,.6);l2.position.set(4,3,-5);S.add(l2);
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const G=-2;
+
+const hs=new THREE.Shape();hs.moveTo(0,0);hs.bezierCurveTo(0,-.3,-.6,-.3,-.6,0);hs.bezierCurveTo(-.6,.3,-.3,.6,0,1);hs.bezierCurveTo(.3,.6,.6,.3,.6,0);hs.bezierCurveTo(.6,-.3,0,-.3,0,0);
+const hg=new THREE.ExtrudeGeometry(hs,{depth:.35,bevelEnabled:true,bevelThickness:.14,bevelSize:.12,bevelSegments:8,curveSegments:24});hg.center();hg.rotateZ(Math.PI);
+
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.55},o));
+function mk(o){
+ const PI=Math.PI,f=!!o.f,g=new THREE.Group(),W=new THREE.Group();W.scale.setScalar(.63);g.add(W);g.tint=[];
+ const V=(x,y,z)=>new THREE.Vector3(x,y,z),SP=new THREE.SphereGeometry(1,24,18),DS={side:THREE.DoubleSide};
+ const T=(c,k,ex)=>{const m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6},ex));if(k)g.tint.push([{material:m},k]);return m};
+ const mesh=(p,ge,m,x,y,z,a=1,b=1,c=1)=>{const n=new THREE.Mesh(ge,m);n.position.set(x,y,z);n.scale.set(a,b,c);p.add(n);return n};
+ const ball=(p,m,x,y,z,a,b=a,c=a)=>mesh(p,SP,m,x,y,z,a,b,c);
+ const seg=(p,m,a,b,r1,r2)=>{const d=b.clone().sub(a),L=d.length(),n=mesh(p,new THREE.CylinderGeometry(r2,r1,L,18),m,0,0,0);
+  n.position.copy(a).add(b).multiplyScalar(.5);n.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());ball(p,m,a.x,a.y,a.z,r1);ball(p,m,b.x,b.y,b.z,r2)};
+ const lathe=(pts,n)=>new THREE.LatheGeometry(pts.map(q=>new THREE.Vector2(q[0],q[1])),n||44);
+ const grp=(p,x,y,z)=>{const n=new THREE.Group();n.position.set(x,y,z);p.add(n);return n};
+ function face(h,hx,hy,hz,c){
+  const Z=(x,y)=>hz*Math.sqrt(Math.max(0,1-(x/hx)**2-(y/hy)**2)),wh=T(0xffffff,0,{roughness:.2}),ir=T(c.iris,0,{roughness:.3}),pu=T(0x0b0b10),br=T(c.brow,0,{roughness:.8}),e=c.er,E=[],B=[];
+  [-1,1].forEach(s=>{const x=s*c.ex,y=c.ey,z=Z(x,y)-.02;
+   E.push(ball(h,wh,x,y,z,e,e*1.2,e*.5),ball(h,ir,x,y-.006,z+e*.4,e*.66,e*.78,e*.2),ball(h,pu,x,y-.006,z+e*.5,e*.36,e*.42,e*.14),ball(h,wh,x+e*.2,y+e*.22,z+e*.6,e*.13,e*.13,e*.07));
+   const yb=y+e*1.9,b=mesh(h,new THREE.BoxGeometry(e*2.3,e*c.bt,e*.35),br,x,yb,Z(x,yb)+.002);b.rotation.z=s*c.tilt;B.push(b);
+   ball(h,c.sk,s*hx*.97,-.02,0,.045,.07,.04)});
+  const yn=c.ey-e*1.7;ball(h,c.sk,0,yn,Z(0,yn)+.005,c.nr,c.nr*.9,c.nr);
+  const ym=c.ey-e*3.1,mg=mesh(h,new THREE.TorusGeometry(c.mw,c.mw*.14,8,18,PI),T(c.lip,0,{roughness:.4}),0,ym+c.mw*.6,Z(0,ym)+.004);mg.rotation.z=PI;
+  const mo=ball(h,T(0x6e1a2e,0,{roughness:.4}),0,ym+c.mw*.1,Z(0,ym)+.002,.001),CK=[-1,1].map(s=>{const x=s*hx*.6,y=c.ey-e*1.8;return ball(h,T(0xff7f9a,0,{roughness:.8}),x,y,Z(x,y)-.005,.001)});
+  E.forEach(n=>n.userData.s=n.scale.clone());B.forEach(n=>n.userData.y=n.position.y);
+  return{E,B,mg,mo,CK,mw:c.mw}}
+ if(f){
+  const sk=T(0xe3a37e),pk=T(0xff6f9c,1,Object.assign({roughness:.75},DS)),pd=T(0xff6f9c,.8),hr=T(0xe9b84c,0,{roughness:.45}),ht=T(0x6b4232,0,DS);
+  const leg=x=>{const p=grp(W,x,1.6,0);seg(p,sk,V(0,0,0),V(0,-1.4,0),.1,.045);ball(p,pd,0,-1.5,.1,.075,.05,.15);mesh(p,new THREE.CylinderGeometry(.022,.014,.13,10),pd,0,-1.535,-.03);ball(p,pd,0,-1.445,.15,.03,.02,.03);return p};
+  g.lL=leg(-.11);g.lR=leg(.11);
+  const D=grp(W,0,0,0);D.scale.z=.72;
+  const dg=lathe([[.41,1.46],[.37,1.68],[.29,1.95],[.19,2.18],[.14,2.28],[.16,2.42],[.18,2.58],[.19,2.76]],48),P=dg.attributes.position;
+  for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i),k=y<2.1?1+.03*Math.sin(Math.atan2(z,x)*9)*(2.1-y)/.6:1;P.setX(i,x*k);P.setZ(i,z*k)}
+  dg.computeVertexNormals();mesh(D,dg,pk,0,0,0);
+  [[.142,2.28],[.19,2.765]].forEach(([r,y])=>{mesh(D,new THREE.TorusGeometry(r,.008,6,48),pd,0,y,0).rotation.x=PI/2});
+  ball(W,sk,0,2.78,0,.235,.1,.13);seg(W,sk,V(0,2.76,0),V(0,3.08,.01),.075,.055);
+  const arm=x=>{const p=grp(W,x,2.75,0),el=grp(p,0,-.46,0);p.el=el;ball(p,pk,0,0,0,.09);seg(p,sk,V(0,0,0),V(0,-.46,0),.05,.042);seg(el,sk,V(0,0,0),V(0,-.4,0),.042,.034);ball(el,sk,0,-.44,.01,.05,.06,.045);return p};
+  g.aL=arm(-.27);g.aR=arm(.27);
+  const h=g.head=grp(W,0,3.28,.01);ball(h,sk,0,0,0,.24,.28,.25);
+  g.fx=face(h,.24,.28,.25,{sk,ex:.09,ey:.02,er:.058,iris:0x6db38c,brow:0x9c6b2e,bt:.3,tilt:.12,nr:.03,mw:.05,lip:0xd85d7c});
+  ball(h,hr,0,-.12,-.08,.29,.42,.24);ball(h,hr,0,.1,-.06,.265,.25,.27);
+  [-1,1].forEach(s=>seg(h,hr,V(s*.23,.08,.02),V(s*.27,-.75,.1),.085,.055));
+  const hat=grp(h,0,.2,-.02);hat.rotation.set(-.06,0,-.08);
+  mesh(hat,lathe([[0,.27],[.17,.265],[.25,.23],[.265,.09],[.34,.05],[.55,.03],[.7,.06],[.73,.09]],40),ht,0,0,0);
+  mesh(hat,new THREE.TorusGeometry(.268,.014,8,40),T(0x3b2216),0,.1,0).rotation.x=PI/2;
+ }else{
+  const sk=T(0xf0b795),su=T(0x2c3e6b,1,DS),lp=T(0x2c3e6b,1.35),sh=T(0xf5f2ea,0,{roughness:.7}),ti=T(0x2c3e6b,.45),hr=T(0x2a1e1a,0,{roughness:.5}),so=T(0x101116,0,{roughness:.25,metalness:.25});
+  const leg=x=>{const p=grp(W,x,2.4,0),kn=grp(p,0,-1.18,0);p.kn=kn;seg(p,su,V(0,0,0),V(0,-1.18,0),.125,.1);seg(kn,su,V(0,0,0),V(0,-1.05,0),.1,.085);ball(kn,so,0,-1.15,.09,.09,.06,.2);return p};
+  g.lL=leg(-.13);g.lR=leg(.13);
+  const D=grp(W,0,0,0);D.scale.z=.55;
+  mesh(D,lathe([[.38,2.2],[.33,2.3],[.35,2.5],[.37,2.75],[.4,3.02],[.32,3.2],[.08,3.28]]),su,0,0,0);
+  seg(W,sk,V(0,3.1,0),V(0,3.42,0),.095,.08);mesh(W,new THREE.CylinderGeometry(.13,.14,.08,24),sh,0,3.24,0);
+  ball(W,sh,0,3,.19,.09,.24,.05);mesh(W,new THREE.BoxGeometry(.075,.5,.02),ti,0,2.83,.24);ball(W,ti,0,3.1,.235,.045,.04,.03);
+  [-1,1].forEach(s=>{mesh(W,new THREE.BoxGeometry(.1,.46,.02),lp,s*.11,2.93,.235).rotation.z=-s*.22;mesh(W,new THREE.BoxGeometry(.14,.035,.02),lp,s*.2,2.36,.17)});
+  [2.55,2.38].forEach(y=>ball(W,T(0x2c3e6b,.6),0,y,.2,.022,.022,.012));
+  const arm=x=>{const p=grp(W,x,3,0),el=grp(p,0,-.5,0);p.el=el;ball(p,su,0,0,0,.12);seg(p,su,V(0,0,0),V(0,-.5,0),.085,.077);seg(el,su,V(0,0,0),V(0,-.42,0),.077,.068);seg(el,sh,V(0,-.42,0),V(0,-.48,0),.07,.07);ball(el,sk,0,-.54,.01,.058,.08,.045);return p};
+  g.aL=arm(-.42);g.aR=arm(.42);
+  const h=g.head=grp(W,0,3.66,0);ball(h,sk,0,0,0,.27,.31,.28);ball(h,sk,0,-.22,.12,.12,.09,.11);
+  g.fx=face(h,.27,.31,.28,{sk,ex:.1,ey:.03,er:.048,iris:0x4b3324,brow:0x231712,bt:.5,tilt:.06,nr:.042,mw:.065,lip:0xb5685c});
+  mesh(h,new THREE.SphereGeometry(1,28,16,0,PI*2,0,PI*.55),hr,0,.07,-.03,.285,.33,.32).rotation.x=-.5;
+  ball(h,hr,0,.34,.1,.2,.1,.18).rotation.x=-.3;
+ }
+ return g}
+const applyTint=(g,h)=>g.tint.forEach(([m,k])=>m.material.color.set(h).multiplyScalar(k));
+const he=mk({});
+const she=mk({f:1});
+const hx=v=>/^#[0-9a-f]{6}$/i.test(v||'');
+if(hx(q.get('dress')))$('dressC').value=q.get('dress');
+if(hx(q.get('suit')))$('suitC').value=q.get('suit');
+applyTint(she,$('dressC').value);applyTint(he,$('suitC').value);
+$('dressC').oninput=e=>applyTint(she,e.target.value);
+$('suitC').oninput=e=>applyTint(he,e.target.value);
+// open ring box in his right hand
+const ring=new THREE.Group();ring.position.set(0,-.62,0);ring.scale.setScalar(1.6);ring.visible=false;he.aL.el.add(ring);
+const rb=(g,m,x,y,z)=>{const n=new THREE.Mesh(g,m);n.position.set(x,y,z);ring.add(n);return n};
+rb(new THREE.BoxGeometry(.16,.08,.12),M(0x7a1230),0,0,0);rb(new THREE.BoxGeometry(.13,.012,.09),M(0xc04862),0,.042,0);
+const lid=new THREE.Group();lid.position.set(0,.04,-.06);lid.rotation.x=-1.9;ring.add(lid);
+const lm=new THREE.Mesh(new THREE.BoxGeometry(.16,.03,.12),M(0x7a1230));lm.position.set(0,.015,.06);lid.add(lm);
+const rg=rb(new THREE.TorusGeometry(.034,.009,12,24),M(0xffd36e,{metalness:.9,roughness:.2}),0,.085,.005);
+const gm=rb(new THREE.OctahedronGeometry(.02),M(0xbff4ff,{metalness:.2,roughness:.05,emissive:0x5fb8d0}),0,.128,.005);gm.rotation.x=Math.PI/2;
+S.add(he,she);
+
+const fc=document.createElement('canvas');fc.width=fc.height=256;const fx=fc.getContext('2d'),fg=fx.createRadialGradient(128,128,0,128,128,128);
+fg.addColorStop(0,'rgba(150,190,205,.95)');fg.addColorStop(.55,'rgba(80,120,150,.5)');fg.addColorStop(1,'rgba(20,40,70,0)');fx.fillStyle=fg;fx.fillRect(0,0,256,256);
+const gr=new THREE.Mesh(new THREE.CircleGeometry(7,64),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(fc),transparent:true,depthWrite:false}));gr.rotation.x=-Math.PI/2;gr.position.y=G-.02;S.add(gr);
+const sh2=new THREE.Mesh(new THREE.PlaneGeometry(14,14),new THREE.ShadowMaterial({opacity:.5}));sh2.rotation.x=-Math.PI/2;sh2.position.y=G;sh2.receiveShadow=true;S.add(sh2);
+[he,she].forEach(c=>c.traverse(m=>{if(m.isMesh)m.castShadow=true}));
+
+const mid=new THREE.Mesh(hg,M(0xff2d63,{roughness:.25,emissive:0x5a0620}));mid.scale.setScalar(.001);S.add(mid);
+const N=60,mini=new THREE.InstancedMesh(hg,M(0xff8aa8,{roughness:.3,emissive:0x40101c}),N);S.add(mini);
+const dd=[],o3=new THREE.Object3D();
+for(let i=0;i<N;i++)dd.push({x:(Math.random()-.5)*18,y:(Math.random()-.5)*14,z:-7+Math.random()*6,s:.12+Math.random()*.22,v:.15+Math.random()*.4,r:Math.random()*6,w:Math.random()*6});
+const pg=new THREE.BufferGeometry(),pp=new Float32Array(1500);for(let i=0;i<1500;i++)pp[i]=(Math.random()-.5)*32;
+pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+S.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xffe2b0,size:.04,transparent:true,opacity:.8})));
+
+// ---- proposal pose: kneel + hand contact ----
+const PHI=-.25,F=new THREE.Vector3(Math.cos(PHI),0,Math.sin(PHI)),NN=new THREE.Vector3(-Math.sin(PHI),0,Math.cos(PHI));
+const PM=new THREE.Vector3(-.3,G,.14),PS=new THREE.Vector3(.285,G,-.319);
+const at=(o,s,n,h)=>o.clone().addScaledVector(F,s).addScaledVector(NN,n).setY(G+h);
+const C0=at(PM,.42,-.33,1.38),cM=C0.clone().setY(C0.y-.03),cW=C0.clone().setY(C0.y+.015),RT=at(PM,.4,.02,1.43),MT=at(PS,-.2,.03,1.95);
+const PLh=new THREE.Vector3(.7,-1,.15),PLr=new THREE.Vector3(-.7,-1,.15),YD=new THREE.Vector3(0,-1,0),XA=new THREE.Vector3(1,0,0);
+const q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),vd=new THREE.Vector3(),vu=new THREE.Vector3(),vp=new THREE.Vector3(),ve=new THREE.Vector3(),vt=new THREE.Vector3();
+function reach(a,T,pole,k,L1,L2){
+ const P=a.parent;vt.copy(T);P.worldToLocal(vt);vd.copy(vt).sub(a.position);
+ const D=Math.min(vd.length(),L1+L2-.01);vu.copy(vd).normalize();
+ const an=Math.acos(Math.max(-1,Math.min(1,(L1*L1+D*D-L2*L2)/(2*L1*D))));
+ vp.copy(pole).addScaledVector(vu,-pole.dot(vu)).normalize();
+ ve.copy(vu).multiplyScalar(Math.cos(an)).addScaledVector(vp,Math.sin(an));
+ q1.setFromUnitVectors(YD,ve);
+ vd.copy(a.position).addScaledVector(ve,L1);vt.sub(vd).normalize().applyQuaternion(q2.copy(q1).invert());
+ q2.setFromUnitVectors(YD,vt);
+ a.quaternion.slerp(q1,k);a.el.quaternion.slerp(q2,k)}
+
+let SX=1.5;function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix();C.userData.z=w/h<.8?10.2:7.4;SX=w/h<.8?1.1:1.5}
+addEventListener('resize',size);size();
+let mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+C.position.set(0,0,8);
+let ps=0,cel=0,amp=0,ph=0;const t0=performance.now();
+(function loop(){
+ const t=(performance.now()-t0)/1000,max=document.documentElement.scrollHeight-innerHeight;
+ const p=started&&max>0?Math.min(1,scrollY/max):0;
+ ps+=(p-ps)*.07;amp+=(Math.min(1,Math.abs(p-ps)*60)-amp)*.15;ph+=amp*.28;cel+=(celebrate-cel)*.05;
+ const e=ss(.16,.66,ps),hold=ss(.66,.74,ps)*(1-ss(.83,.9,ps)),k=ss(.86,.98,ps)*(1-cel),sw=Math.sin(ph)*amp,x=lerp(SX,4.4,ss(0,.15,ps))-3.85*e;
+ const j1=cel*Math.abs(Math.sin(t*6))*.55,j2=cel*Math.abs(Math.sin(t*6+1))*.55;
+ he.position.set(lerp(-x,PM.x,k),G-k*.71+j1,lerp(0,PM.z,k));she.position.set(lerp(x,PS.x,k),G+j2,lerp(0,PS.z,k));
+ const A=ss(0,.07,ps),B=ss(.14,.2,ps);he.rotation.y=(-Math.PI/2*A+Math.PI*B+.25*k)*(1-cel);she.rotation.y=(Math.PI/2*A-Math.PI*B+.25*k)*(1-cel);
+ he.lL.rotation.x=sw*.8*(1-k)+.1*k;he.lR.rotation.x=-sw*.8*(1-k)-1.515*k;she.lL.rotation.x=-sw*.8;she.lR.rotation.x=sw*.8;
+ he.lL.kn.rotation.x=Math.max(0,he.lL.rotation.x)*.6*(1-k)+1.628*k;he.lR.kn.rotation.x=Math.max(0,he.lR.rotation.x)*.6*(1-k)+1.515*k;
+ [he.aL,he.aR,she.aL,she.aR].forEach(a=>{a.rotation.set(0,0,0);a.el.rotation.set(0,0,0)});he.aL.rotation.x=-sw*.6;she.aR.rotation.x=-sw*.6;
+ he.aR.rotation.x=lerp(sw*.6,-1.25,hold);she.aL.rotation.x=lerp(sw*.6,-1.25,hold);
+ const wv=-3+Math.sin(t*9)*.35;
+ [he.aL,he.aR,she.aL,she.aR].forEach(a=>a.rotation.x=lerp(a.rotation.x,wv,cel));
+ const sh=(1-ss(0,.1,ps))*(1-cel);
+ const pz=(a,z,ez)=>{a.rotation.x=lerp(a.rotation.x,0,sh);a.rotation.z=lerp(0,z,sh);a.el.rotation.z=lerp(0,ez,sh)};
+ pz(he.aL,-.7,1.5);pz(he.aR,.12,-.2);pz(she.aL,-.75,1.6);pz(she.aR,.75,-1.6);
+ he.lR.rotation.z=.1*sh;she.lL.rotation.z=.05*sh;
+ he.head.rotation.set(-.5*k,.28*k,Math.sin(t*1.5)*.06);she.head.rotation.set(.22*k,.29*k,Math.sin(t*1.5+1)*.06);
+ ring.visible=k>.3;rg.rotation.y=t*2;gm.rotation.z=t*2;
+ [[he,.4],[she,1]].forEach(([c,a])=>{const f=c.fx,w=k*a;f.E.forEach(n=>n.scale.copy(n.userData.s).multiplyScalar(1+.16*w));f.B.forEach(n=>n.position.y=n.userData.y+.03*w);f.mg.scale.set(1+.25*w,1+.5*w,1);f.mo.scale.set(f.mw*.75*w+.001,f.mw*.5*w+.001,.01*w+.001);f.CK.forEach(n=>n.scale.set(.055*w+.001,.035*w+.001,.018*w+.001))});
+ if(k>0){he.updateMatrixWorld(true);she.updateMatrixWorld(true);
+  reach(he.aR,cM,PLh,k,.5,.54);reach(she.aL,cW,PLr,k,.46,.44);reach(he.aL,RT,PLr,k,.5,.54);reach(she.aR,MT,PLh,k,.46,.44);
+  he.updateMatrixWorld(true);he.aL.el.getWorldQuaternion(q1);ring.quaternion.copy(q1).invert().multiply(he.quaternion).multiply(q2.setFromAxisAngle(XA,.35))}
+ const beat=1+Math.pow(Math.max(0,Math.sin(t*(cel?7:2.6))),8)*.15;
+ mid.scale.setScalar((.55*ss(.62,.72,ps)+cel*.5)*beat);mid.position.set(0,.95+Math.sin(t*2)*.1,0);mid.rotation.y=t*.8;
+ for(let i=0;i<N;i++){const d=dd[i],y=((d.y+t*d.v+8)%16)-8;
+  o3.position.set(d.x+Math.sin(t*.7+d.w)*.5,y,d.z);o3.rotation.set(t*.4+d.r,t*.6+d.r,0);o3.scale.setScalar(d.s*(1+cel*.6));o3.updateMatrix();mini.setMatrixAt(i,o3.matrix)}
+ mini.instanceMatrix.needsUpdate=true;
+ C.position.x+=(mx*.8-C.position.x)*.04;C.position.y+=(.3-my*.5-C.position.y)*.04;const zm=Math.max(ss(.6,.95,ps),cel),sc=1-ss(0,.12,ps);C.position.z+=(C.userData.z*(1-.22*zm)*lerp(1,.78,sc)-C.position.z)*.04;
+ C.lookAt(0,-.6+.7*zm+.8*sc,0);R.render(S,C);requestAnimationFrame(loop)})();
+
+// Playful "No"
+const no=$('no'),yes=$('yes');let dodges=0;
+function dodge(e){if(e)e.preventDefault();dodges++;no.style.position='fixed';
+ no.style.left=Math.random()*(innerWidth-no.offsetWidth-20)+10+'px';no.style.top=Math.random()*(innerHeight-no.offsetHeight-20)+10+'px';
+ no.style.transform='scale('+Math.max(.6,1-dodges*.07)+')';if(dodges>4)no.textContent='Okay, yes!';
+ yes.style.transform='scale('+Math.min(1.4,1+dodges*.07)+')'}
+no.addEventListener('pointerenter',()=>{if(dodges<=4)dodge()});
+no.addEventListener('touchstart',e=>{if(dodges<=4)dodge(e)},{passive:false});
+no.addEventListener('click',e=>{dodges>4?say():dodge(e)});
+
+function say(){
+ $('win').classList.add('show');celebrate=1;
+ const em=['💖','💕','💗','🌹','✨','💍','💞'];
+ for(let i=0;i<90;i++){const s=document.createElement('span');s.className='c';s.textContent=em[i%em.length];
+  s.style.left=Math.random()*100+'vw';s.style.fontSize=(1+Math.random()*1.8)+'rem';s.style.setProperty('--r',(Math.random()*720-360)+'deg');
+  s.style.animationDuration=(3+Math.random()*4)+'s';s.style.animationDelay=Math.random()*2.5+'s';
+  document.body.appendChild(s);setTimeout(()=>s.remove(),9500)}
+}
+yes.addEventListener('click',say);
+</script>
+</body>
+</html>
